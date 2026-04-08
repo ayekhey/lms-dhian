@@ -1,0 +1,105 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  STUDENT
+  TEACHER
+}
+
+model User {
+  id             String    @id @default(uuid())
+  name           String
+  email          String    @unique
+  passwordHash   String
+  role           Role
+  tier           Int?
+  diagnosticDone Boolean   @default(false)
+  createdAt      DateTime  @default(now())
+
+  modules        Module[]
+  exercises      Exercise[]
+  results        ExerciseResult[]
+}
+
+model DiagnosticQuestion {
+  id            String  @id @default(uuid())
+  questionText  String
+  options       Json    // Array of option strings e.g. ["A", "B", "C", "D"]
+  correctOption Int     // Index of correct option, 0-based
+}
+
+model Module {
+  id          String       @id @default(uuid())
+  title       String
+  description String?
+  teacherId   String
+  createdAt   DateTime     @default(now())
+
+  teacher     User         @relation(fields: [teacherId], references: [id])
+  pages       ModulePage[]
+}
+
+model ModulePage {
+  id            String     @id @default(uuid())
+  moduleId      String
+  pageNumber    Int
+  content       String
+  extendContent String?
+  helpContent   String?
+
+  module        Module     @relation(fields: [moduleId], references: [id], onDelete: Cascade)
+  miniQuiz      MiniQuiz?
+}
+
+model MiniQuiz {
+  id            String     @id @default(uuid())
+  pageId        String     @unique
+  questionText  String
+  options       Json
+  correctOption Int
+
+  page          ModulePage @relation(fields: [pageId], references: [id], onDelete: Cascade)
+}
+
+model MediaItem {
+  id        String   @id @default(uuid())
+  label     String?
+  imageUrl  String
+  teacherId String
+  createdAt DateTime @default(now())
+}
+
+model Exercise {
+  id           String           @id @default(uuid())
+  title        String
+  teacherId    String
+  timerMinutes Int?
+  questions    Json
+  createdAt    DateTime         @default(now())
+
+  teacher      User             @relation(fields: [teacherId], references: [id])
+  results      ExerciseResult[]
+}
+
+model ExerciseResult {
+  id          String   @id @default(uuid())
+  exerciseId  String
+  studentId   String
+  score       Int
+  submittedAt DateTime @default(now())
+
+  exercise    Exercise @relation(fields: [exerciseId], references: [id])
+  student     User     @relation(fields: [studentId], references: [id])
+}
+
+model SystemConfig {
+  id    String @id @default(uuid())
+  key   String @unique
+  value String
+}
