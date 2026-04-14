@@ -7,6 +7,7 @@ const {
   getResults,
   getConfig,
   setConfig,
+  getMyResult,
 } = require('../controllers/postTestController');
 const authMiddleware = require('../middleware/authMiddleware');
 const roleMiddleware = require('../middleware/roleMiddleware');
