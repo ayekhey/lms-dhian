@@ -20,11 +20,13 @@ model User {
   role           Role
   tier           Int?
   diagnosticDone Boolean   @default(false)
+  postTestDone   Boolean   @default(false)
   createdAt      DateTime  @default(now())
 
   modules        Module[]
   exercises      Exercise[]
   results        ExerciseResult[]
+  postTestResults PostTestResult[]
 }
 
 model DiagnosticQuestion {
@@ -102,4 +104,14 @@ model SystemConfig {
   id    String @id @default(uuid())
   key   String @unique
   value String
+}
+
+model PostTestResult {
+  id          String   @id @default(uuid())
+  studentId   String
+  score       Int
+  maxScore    Int
+  submittedAt DateTime @default(now())
+
+  student     User     @relation(fields: [studentId], references: [id])
 }

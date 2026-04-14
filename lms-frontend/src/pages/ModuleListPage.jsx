@@ -1,60 +1,78 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useAuth } from '../context/AuthContext';
+import PageLayout from '../components/PageLayout';
 import api from '../api/axios';
 
 export default function ModuleListPage() {
   const [modules, setModules] = useState([]);
   const [loading, setLoading] = useState(true);
-  const { user, logout } = useAuth();
   const navigate = useNavigate();
 
   useEffect(() => {
-    api.get('/modules')
-      .then(res => setModules(res.data))
-      .finally(() => setLoading(false));
+    api.get('/modules').then(res => setModules(res.data)).finally(() => setLoading(false));
   }, []);
 
-  const handleLogout = () => {
-    logout();
-    navigate('/login');
-  };
-
-  if (loading) return <div className="p-8">Loading...</div>;
+  if (loading) return <PageLayout title="Modules"><p style={{ color: '#6b7280' }}>Loading...</p></PageLayout>;
 
   return (
-    <div className="min-h-screen bg-gray-100">
-      <nav className="bg-white shadow px-6 py-4 flex justify-between items-center">
-        <button onClick={() => navigate('/student/dashboard')} className="text-xl font-bold text-gray-800">
-          ← LMS
-        </button>
-        <button onClick={handleLogout} className="text-sm text-red-500 hover:text-red-700">
-          Logout
-        </button>
-      </nav>
-
-      <div className="max-w-4xl mx-auto p-8">
-        <h2 className="text-2xl font-bold text-gray-800 mb-6">Modules</h2>
-
-        {modules.length === 0 ? (
-          <p className="text-gray-500">No modules available yet.</p>
-        ) : (
-          <div className="space-y-4">
-            {modules.map(module => (
-              <button
-                key={module.id}
-                onClick={() => navigate(`/student/modules/${module.id}`)}
-                className="w-full bg-white rounded-lg shadow p-6 text-left hover:shadow-md transition"
-              >
-                <h3 className="text-lg font-semibold text-gray-800">{module.title}</h3>
-                {module.description && (
-                  <p className="text-sm text-gray-500 mt-1">{module.description}</p>
-                )}
-              </button>
-            ))}
-          </div>
-        )}
-      </div>
-    </div>
+    <PageLayout title="Modules" subtitle="Select a module to start learning.">
+      {modules.length === 0 ? (
+        <div style={s.empty}>No modules available yet.</div>
+      ) : (
+        <div style={s.list}>
+          {modules.map((mod, i) => (
+            <button
+              key={mod.id}
+              onClick={() => navigate(`/student/modules/${mod.id}`)}
+              style={s.card}
+              onMouseEnter={e => e.currentTarget.style.backgroundColor = '#f9fafb'}
+              onMouseLeave={e => e.currentTarget.style.backgroundColor = '#ffffff'}
+            >
+              <div style={s.num}>{String(i + 1).padStart(2, '0')}</div>
+              <div style={s.info}>
+                <h3 style={s.title}>{mod.title}</h3>
+                {mod.description && <p style={s.desc}>{mod.description}</p>}
+              </div>
+              <span style={s.arrow}>→</span>
+            </button>
+          ))}
+        </div>
+      )}
+    </PageLayout>
   );
 }
+
+const s = {
+  list: { display: 'flex', flexDirection: 'column', gap: '12px' },
+  card: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '20px',
+    backgroundColor: '#ffffff',
+    border: '1px solid #e5e7eb',
+    borderRadius: '14px',
+    padding: '20px 24px',
+    cursor: 'pointer',
+    textAlign: 'left',
+    transition: 'background-color 0.15s',
+    boxShadow: '0 1px 3px rgba(0,0,0,0.04)',
+  },
+  num: {
+    fontFamily: "'Syne', sans-serif",
+    fontWeight: 800,
+    fontSize: '22px',
+    color: '#d1d5db',
+    minWidth: '40px',
+  },
+  info: { flex: 1 },
+  title: {
+    fontFamily: "'Syne', sans-serif",
+    fontWeight: 700,
+    fontSize: '16px',
+    color: '#111827',
+    margin: '0 0 4px 0',
+  },
+  desc: { fontSize: '14px', color: '#6b7280', margin: 0 },
+  arrow: { fontSize: '20px', color: '#9ca3af' },
+  empty: { color: '#6b7280', fontSize: '15px' },
+};

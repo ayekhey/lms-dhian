@@ -9,9 +9,11 @@ import StudentDashboard from './pages/StudentDashboard';
 import ModuleListPage from './pages/ModuleListPage';
 import ModuleViewerPage from './pages/ModuleViewerPage';
 import MediaPage from './pages/MediaPage';
-import ExercisePage from './pages/ExercisePage';
+// import ExercisePage from './pages/ExercisePage';
+import PostTestPage from './pages/PostTestPage';
 import TeacherDashboard from './pages/TeacherDashboard';
 import TeacherModulePage from './pages/TeacherModulePage';
+import TeacherModuleEditPage from './pages/TeacherModuleEditPage';
 import TeacherMediaPage from './pages/TeacherMediaPage';
 import TeacherExercisePage from './pages/TeacherExercisePage';
 import TeacherDiagnosticPage from './pages/TeacherDiagnosticPage';
@@ -42,11 +44,13 @@ export default function App() {
           <Route path="/student/modules" element={<StudentRoute><ModuleListPage /></StudentRoute>} />
           <Route path="/student/modules/:id" element={<StudentRoute><ModuleViewerPage /></StudentRoute>} />
           <Route path="/student/media" element={<StudentRoute><MediaPage /></StudentRoute>} />
-          <Route path="/student/exercises" element={<StudentRoute><ExercisePage /></StudentRoute>} />
+          {/* <Route path="/student/exercises" element={<StudentRoute><ExercisePage /></StudentRoute>} /> */}
+          <Route path="/student/posttest" element={<StudentRoute><PostTestPage /></StudentRoute>} />
 
           {/* Teacher routes */}
           <Route path="/teacher/dashboard" element={<TeacherRoute><TeacherDashboard /></TeacherRoute>} />
           <Route path="/teacher/modules" element={<TeacherRoute><TeacherModulePage /></TeacherRoute>} />
+          <Route path="/teacher/modules/:id/edit" element={<TeacherRoute><TeacherModuleEditPage /></TeacherRoute>} />
           <Route path="/teacher/media" element={<TeacherRoute><TeacherMediaPage /></TeacherRoute>} />
           <Route path="/teacher/exercises" element={<TeacherRoute><TeacherExercisePage /></TeacherRoute>} />
           <Route path="/teacher/diagnostic" element={<TeacherRoute><TeacherDiagnosticPage /></TeacherRoute>} />

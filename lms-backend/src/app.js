@@ -6,6 +6,7 @@ const moduleRoutes = require('./routes/moduleRoutes');
 const mediaRoutes = require('./routes/mediaRoutes');
 const exerciseRoutes = require('./routes/exerciseRoutes');
 const userRoutes = require('./routes/userRoutes');
+const postTestRoutes = require('./routes/postTestRoutes');
 
 const app = express();
 
@@ -28,5 +29,6 @@ app.use('/api/diagnostic', diagnosticRoutes);
 app.use('/api/modules', moduleRoutes);
 app.use('/api/media', mediaRoutes);
 app.use('/api/exercises', exerciseRoutes);
+app.use('/api/posttest', postTestRoutes);
 
 module.exports = app;

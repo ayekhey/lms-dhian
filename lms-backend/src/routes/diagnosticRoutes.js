@@ -24,3 +24,4 @@ router.delete('/questions/:id', authMiddleware, roleMiddleware('TEACHER'), delet
 router.put('/config', authMiddleware, roleMiddleware('TEACHER'), setConfig);
 
 module.exports = router;
+router.get('/results', authMiddleware, roleMiddleware('TEACHER'), getResults);

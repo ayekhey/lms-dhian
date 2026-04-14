@@ -98,30 +98,69 @@ const submitDiagnostic = async (req, res) => {
   }
 };
 
-// GET /api/diagnostic/config - get diagnostic timer
+// GET /api/diagnostic/config - updated to include randomize and maxScore
 const getConfig = async (req, res) => {
   try {
-    const config = await prisma.systemConfig.findUnique({
-      where: { key: 'diagnostic_timer_minutes' }
+    const [timer, randomize, maxScore] = await Promise.all([
+      prisma.systemConfig.findUnique({ where: { key: 'diagnostic_timer_minutes' } }),
+      prisma.systemConfig.findUnique({ where: { key: 'pre_test_randomize' } }),
+      prisma.systemConfig.findUnique({ where: { key: 'pre_test_max_score' } }),
+    ]);
+    res.json({
+      timerMinutes: timer ? parseInt(timer.value) : null,
+      randomize: randomize?.value === 'true',
+      maxScore: maxScore ? parseInt(maxScore.value) : null,
     });
-    res.json({ timerMinutes: config ? parseInt(config.value) : null });
   } catch (error) {
     res.status(500).json({ message: 'Server error' });
   }
 };
 
-// PUT /api/diagnostic/config - teacher sets diagnostic timer
 const setConfig = async (req, res) => {
   try {
-    const { timerMinutes } = req.body;
+    const { timerMinutes, randomize, maxScore } = req.body;
 
-    await prisma.systemConfig.upsert({
-      where: { key: 'diagnostic_timer_minutes' },
-      update: { value: timerMinutes ? String(timerMinutes) : '0' },
-      create: { key: 'diagnostic_timer_minutes', value: timerMinutes ? String(timerMinutes) : '0' }
+    await Promise.all([
+      prisma.systemConfig.upsert({
+        where: { key: 'diagnostic_timer_minutes' },
+        update: { value: timerMinutes ? String(timerMinutes) : '0' },
+        create: { key: 'diagnostic_timer_minutes', value: timerMinutes ? String(timerMinutes) : '0' },
+      }),
+      prisma.systemConfig.upsert({
+        where: { key: 'pre_test_randomize' },
+        update: { value: String(randomize) },
+        create: { key: 'pre_test_randomize', value: String(randomize) },
+      }),
+      prisma.systemConfig.upsert({
+        where: { key: 'pre_test_max_score' },
+        update: { value: maxScore ? String(maxScore) : '0' },
+        create: { key: 'pre_test_max_score', value: maxScore ? String(maxScore) : '0' },
+      }),
+    ]);
+
+    res.json({ message: 'Config saved' });
+  } catch (error) {
+    res.status(500).json({ message: 'Server error' });
+  }
+};
+
+const getResults = async (req, res) => {
+  try {
+    const students = await prisma.user.findMany({
+      where: { role: 'STUDENT', diagnosticDone: true },
+      select: { id: true, name: true, email: true, tier: true, createdAt: true },
+      orderBy: { createdAt: 'desc' }
     });
 
-    res.json({ timerMinutes });
+    const results = students.map(u => ({
+      id: u.id,
+      student: { name: u.name, email: u.email, tier: u.tier },
+      score: '—',
+      total: '—',
+      submittedAt: u.createdAt,
+    }));
+
+    res.json(results);
   } catch (error) {
     res.status(500).json({ message: 'Server error' });
   }
@@ -134,5 +173,5 @@ module.exports = {
   deleteQuestion,
   submitDiagnostic,
   getConfig,
-  setConfig
+  setConfig,
 };
