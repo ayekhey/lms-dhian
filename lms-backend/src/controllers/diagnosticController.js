@@ -174,4 +174,5 @@ module.exports = {
   submitDiagnostic,
   getConfig,
   setConfig,
+  getResults,
 };
