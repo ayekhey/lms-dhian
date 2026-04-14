@@ -7,7 +7,8 @@ const {
   deleteQuestion,
   submitDiagnostic,
   getConfig,
-  setConfig
+  setConfig,
+  getResults,  // ADD THIS if missing
 } = require('../controllers/diagnosticController');
 const authMiddleware = require('../middleware/authMiddleware');
 const roleMiddleware = require('../middleware/roleMiddleware');
