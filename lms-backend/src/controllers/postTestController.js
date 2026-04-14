@@ -1,8 +1,6 @@
 const prisma = require('../prismaClient');
 
-const timerConfig = await prisma.systemConfig.findUnique({
-  where: { key: 'post_test_timer_minutes' }
-});
+
 
 // GET /api/posttest/questions - get questions for post test (same as diagnostic)
 const getQuestions = async (req, res) => {
