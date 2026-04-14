@@ -200,4 +200,4 @@ const setConfig = async (req, res) => {
   }
 };
 
-module.exports = { getQuestions, submitPostTest, getStatus, getResults, getConfig, setConfig, getMyResult };
+module.exports = { getQuestions, submitPostTest, getStatus, getResults, getConfig, setConfig, getMyResult };// deploy fix
