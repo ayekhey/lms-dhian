@@ -58,20 +58,20 @@ const createModule = async (req, res) => {
 };
 
 // PUT /api/modules/:id - Update module (teacher only)
-// const updateModule = async (req, res) => {
-//   try {
-//     const { title, description } = req.body;
+const updateModule = async (req, res) => {
+  try {
+    const { title, description } = req.body;
 
-//     const module = await prisma.module.update({
-//       where: { id: req.params.id },
-//       data: { title, description }
-//     });
+    const module = await prisma.module.update({
+      where: { id: req.params.id },
+      data: { title, description }
+    });
 
-//     res.json(module);
-//   } catch (error) {
-//     res.status(500).json({ message: 'Server error' });
-//   }
-// };
+    res.json(module);
+  } catch (error) {
+    res.status(500).json({ message: 'Server error' });
+  }
+};
 
 // DELETE /api/modules/:id - Delete module (teacher only)
 const deleteModule = async (req, res) => {
