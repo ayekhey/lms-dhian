@@ -4,6 +4,127 @@ import { useAuth } from '../context/AuthContext';
 import api from '../api/axios';
 import ModuleRenderer from '../components/editor/ModuleRenderer';
 
+function TopicBlockRenderer({ topic, tier }) {
+  // New block format
+  if (topic.blocks && Array.isArray(topic.blocks) && topic.blocks.length > 0) {
+    return (
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+        {topic.blocks.map((block, i) => {
+          if (block.type === 'main') {
+            return (
+              <div key={i}>
+                <ModuleRenderer content={block.content} tier={tier} />
+              </div>
+            );
+          }
+
+          if (block.type === 'show_hide') {
+            const blockTier = block.tier;
+            if (blockTier === 'extend' && tier < 2) return null;
+            if (blockTier === 'help' && tier < 3) return null;
+
+            const styles = {
+              extend: { border: '#bfdbfe', bg: '#eff6ff', text: '#1d4ed8', accent: '#3b82f6' },
+              help: { border: '#fde68a', bg: '#fffbeb', text: '#92400e', accent: '#d97706' },
+              all: { border: '#bbf7d0', bg: '#f0fdf4', text: '#166534', accent: '#16a34a' },
+            };
+            const st = styles[blockTier] || styles.extend;
+
+            return <ShowHideRenderer key={i} block={block} style={st} tier={tier} />;
+          }
+
+          if (block.type === 'quiz') {
+            return <QuizRenderer key={i} block={block} tier={tier} />;
+          }
+
+          return null;
+        })}
+      </div>
+    );
+  }
+
+  // Legacy format
+  return <ModuleRenderer content={topic.content} tier={tier} />;
+}
+
+function ShowHideRenderer({ block, style: st, tier }) {
+  const [open, setOpen] = useState(false);
+  return (
+    <div style={{ margin: '4px 0' }}>
+      <button
+        onClick={() => setOpen(o => !o)}
+        style={{
+          display: 'inline-flex', alignItems: 'center', gap: '6px',
+          padding: '5px 12px', borderRadius: '99px',
+          border: `1px solid ${open ? st.border : '#e2e8f0'}`,
+          backgroundColor: open ? st.bg : '#f8fafc',
+          fontSize: '12px', fontWeight: 600,
+          color: open ? st.text : '#64748b',
+          cursor: 'pointer', fontFamily: 'inherit', marginBottom: '6px', transition: 'all 0.15s',
+        }}
+      >
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"
+          style={{ transform: open ? 'rotate(180deg)' : 'rotate(0)', transition: 'transform 0.2s' }}>
+          <path d="M6 9l6 6 6-6"/>
+        </svg>
+        {open ? 'Hide' : block.label || 'Show more'}
+      </button>
+      <div style={{ maxHeight: open ? '800px' : '0', overflow: 'hidden', opacity: open ? 1 : 0, transition: 'max-height 0.35s ease, opacity 0.25s ease' }}>
+        <div style={{ borderLeft: `3px solid ${st.accent}`, borderRadius: '0 8px 8px 0', padding: '12px 16px', backgroundColor: st.bg, fontSize: '14px', color: st.text, lineHeight: 1.7 }}>
+          <ModuleRenderer content={block.content} tier={tier} />
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function QuizRenderer({ block }) {
+  const [answer, setAnswer] = useState(null);
+  const labels = ['A', 'B', 'C', 'D', 'E'];
+
+  return (
+    <div style={{ backgroundColor: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '14px', padding: '20px 24px', marginTop: '8px' }}>
+      <p style={{ fontSize: '11px', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.06em', color: '#94a3b8', margin: '0 0 12px' }}>Quiz</p>
+      <div style={{ fontSize: '15px', fontWeight: 600, color: '#0f172a', marginBottom: '16px', lineHeight: 1.5 }}>
+        <ModuleRenderer content={block.question} tier={3} />
+      </div>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+        {(block.options || []).map((opt, i) => {
+          if (!opt) return null;
+          const selected = answer === i;
+          const isCorrect = selected && i === block.correctOption;
+          const isWrong = selected && i !== block.correctOption;
+          return (
+            <button
+              key={i}
+              disabled={answer !== null}
+              onClick={() => setAnswer(i)}
+              style={{
+                display: 'flex', alignItems: 'flex-start', gap: '10px',
+                padding: '11px 14px', borderRadius: '10px', textAlign: 'left',
+                border: `1.5px solid ${isCorrect ? '#86efac' : isWrong ? '#fecaca' : '#e2e8f0'}`,
+                backgroundColor: isCorrect ? '#f0fdf4' : isWrong ? '#fef2f2' : '#f8fafc',
+                cursor: answer === null ? 'pointer' : 'default', fontFamily: 'inherit',
+                transition: 'all 0.15s',
+              }}
+            >
+              <span style={{ fontSize: '12px', fontWeight: 700, color: isCorrect ? '#16a34a' : isWrong ? '#dc2626' : '#94a3b8', flexShrink: 0, paddingTop: '2px' }}>{labels[i]}</span>
+              <div style={{ flex: 1, fontSize: '14px', color: isCorrect ? '#166534' : isWrong ? '#991b1b' : '#374151' }}>
+                <ModuleRenderer content={opt} tier={3} />
+              </div>
+            </button>
+          );
+        })}
+      </div>
+      {answer !== null && (
+        <p style={{ fontSize: '13px', fontWeight: 600, color: answer === block.correctOption ? '#16a34a' : '#dc2626', marginTop: '12px' }}>
+          {answer === block.correctOption ? '✅ Correct!' : '❌ Incorrect — try reviewing the content above.'}
+        </p>
+      )}
+    </div>
+  );
+}
+
 function MiniQuiz({ quiz }) {
   const [answer, setAnswer] = useState(null);
   const correct = answer === quiz.correctOption;
@@ -159,8 +280,8 @@ export default function ModuleViewerPage() {
             </div>
 
             <div style={s.topicBody}>
-              <ModuleRenderer content={topic.content} tier={user?.tier || 1} />
-            </div>
+  <TopicBlockRenderer topic={topic} tier={user?.tier || 1} />
+</div>
 
             {topic.miniQuiz && <MiniQuiz quiz={topic.miniQuiz} />}
           </div>

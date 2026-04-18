@@ -1,13 +1,13 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import api from '../api/axios';
-import ModuleEditor from '../components/editor/ModuleEditor';
+import BlockEditor from '../components/editor/BlockEditor';
 
 export default function TeacherTopicEditPage() {
   const { id, topicId } = useParams();
   const navigate = useNavigate();
 
-  const [content, setContent] = useState(null);
+  const [blocks, setBlocks] = useState(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [successMsg, setSuccessMsg] = useState('');
@@ -18,10 +18,19 @@ export default function TeacherTopicEditPage() {
       const topic = res.data.find(p => p.id === topicId);
       if (topic) {
         setTopicNumber(topic.pageNumber);
-        try {
-          setContent(typeof topic.content === 'string' ? JSON.parse(topic.content) : topic.content);
-        } catch {
-          setContent(topic.content);
+        if (topic.blocks && Array.isArray(topic.blocks) && topic.blocks.length > 0) {
+          setBlocks(topic.blocks);
+        } else {
+          // Migrate old content to block format
+          setBlocks([{
+            id: crypto.randomUUID(),
+            type: 'main',
+            content: (() => {
+              try {
+                return typeof topic.content === 'string' ? JSON.parse(topic.content) : topic.content;
+              } catch { return null; }
+            })(),
+          }]);
         }
       }
     }).finally(() => setLoading(false));
@@ -31,9 +40,8 @@ export default function TeacherTopicEditPage() {
     setSaving(true);
     try {
       await api.put(`/modules/${id}/pages/${topicId}`, {
-        content: JSON.stringify(content),
-        extendContent: null,
-        helpContent: null,
+        content: '',
+        blocks: blocks,
       });
       setSuccessMsg('Topic saved');
       setTimeout(() => setSuccessMsg(''), 3000);
@@ -52,7 +60,6 @@ export default function TeacherTopicEditPage() {
     <div style={s.root}>
       <style>{css}</style>
 
-      {/* Topbar */}
       <div style={s.topbar}>
         <button onClick={() => navigate(`/teacher/modules/${id}/edit`)} style={s.backBtn}>
           ← Back to Module
@@ -66,10 +73,9 @@ export default function TeacherTopicEditPage() {
       <div style={s.content}>
         {successMsg && <div style={s.successBanner}>✓ {successMsg}</div>}
 
-        <div style={s.card}>
-          <p style={s.hint}>Use the toolbar to format content, add show/hide blocks, equations, images, or videos.</p>
-          <ModuleEditor content={content} onChange={setContent} />
-        </div>
+        {blocks && (
+          <BlockEditor blocks={blocks} onChange={setBlocks} />
+        )}
       </div>
     </div>
   );
@@ -79,6 +85,16 @@ const css = `
   @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
   @keyframes spin { to { transform: rotate(360deg); } }
+  .ProseMirror { outline: none; padding: 14px 16px; min-height: 72px; font-size: 14px; line-height: 1.75; color: #374151; }
+  .ProseMirror p { margin: 0 0 10px; }
+  .ProseMirror h1 { font-size: 22px; font-weight: 800; margin: 0 0 10px; color: #0f172a; }
+  .ProseMirror h2 { font-size: 18px; font-weight: 700; margin: 0 0 10px; color: #0f172a; }
+  .ProseMirror h3 { font-size: 16px; font-weight: 600; margin: 0 0 10px; color: #0f172a; }
+  .ProseMirror ul, .ProseMirror ol { padding-left: 20px; margin: 0 0 10px; }
+  .ProseMirror li { margin-bottom: 4px; }
+  .ProseMirror strong { font-weight: 700; color: #0f172a; }
+  .ProseMirror a { color: #2563eb; text-decoration: underline; }
+  .ProseMirror img { max-width: 100%; border-radius: 8px; margin: 8px 0; }
 `;
 
 const s = {
@@ -88,8 +104,6 @@ const s = {
   backBtn: { background: 'none', border: 'none', cursor: 'pointer', fontSize: '14px', fontWeight: 600, color: '#3b82f6', fontFamily: "'Inter', sans-serif", padding: 0 },
   topbarTitle: { fontSize: '16px', fontWeight: 700, color: '#0f172a', fontFamily: "'Inter', sans-serif" },
   btnPrimary: { backgroundColor: '#1d4ed8', color: '#ffffff', border: 'none', borderRadius: '10px', padding: '10px 20px', fontSize: '14px', fontWeight: 600, cursor: 'pointer', fontFamily: "'Inter', sans-serif" },
-  content: { maxWidth: '900px', margin: '0 auto', padding: '36px 24px 80px' },
+  content: { maxWidth: '860px', margin: '0 auto', padding: '32px 24px 80px' },
   successBanner: { backgroundColor: '#dcfce7', border: '1px solid #86efac', color: '#166534', padding: '12px 16px', borderRadius: '10px', fontSize: '14px', fontWeight: 600, marginBottom: '20px' },
-  card: { backgroundColor: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '16px', padding: '24px 28px', boxShadow: '0 1px 3px rgba(0,0,0,0.04)' },
-  hint: { fontSize: '13px', color: '#94a3b8', marginBottom: '16px' },
 };
