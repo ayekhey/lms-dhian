@@ -48,15 +48,17 @@ model Module {
 }
 
 model ModulePage {
-  id            String     @id @default(uuid())
-  moduleId      String
-  pageNumber    Int
-  content       String
+  id          String   @id @default(uuid())
+  moduleId    String
+  pageNumber  Int
+  content     String?
   extendContent String?
-  helpContent   String?
+  helpContent String?
+  blocks      Json?
+  createdAt   DateTime @default(now())
 
-  module        Module     @relation(fields: [moduleId], references: [id], onDelete: Cascade)
-  miniQuiz      MiniQuiz?
+  module      Module   @relation(fields: [moduleId], references: [id])
+  miniQuiz    MiniQuiz?
 }
 
 model MiniQuiz {

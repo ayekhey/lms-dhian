@@ -58,20 +58,20 @@ const createModule = async (req, res) => {
 };
 
 // PUT /api/modules/:id - Update module (teacher only)
-const updateModule = async (req, res) => {
-  try {
-    const { title, description } = req.body;
+// const updateModule = async (req, res) => {
+//   try {
+//     const { title, description } = req.body;
 
-    const module = await prisma.module.update({
-      where: { id: req.params.id },
-      data: { title, description }
-    });
+//     const module = await prisma.module.update({
+//       where: { id: req.params.id },
+//       data: { title, description }
+//     });
 
-    res.json(module);
-  } catch (error) {
-    res.status(500).json({ message: 'Server error' });
-  }
-};
+//     res.json(module);
+//   } catch (error) {
+//     res.status(500).json({ message: 'Server error' });
+//   }
+// };
 
 // DELETE /api/modules/:id - Delete module (teacher only)
 const deleteModule = async (req, res) => {
@@ -89,20 +89,20 @@ const deleteModule = async (req, res) => {
 // POST /api/modules/:id/pages - Add page to module (teacher only)
 const addPage = async (req, res) => {
   try {
-    const { pageNumber, content, extendContent, helpContent } = req.body;
-
+    const { pageNumber, content, extendContent, helpContent, blocks } = req.body;
     const page = await prisma.modulePage.create({
       data: {
         moduleId: req.params.id,
         pageNumber,
-        content,
+        content: content || '',
         extendContent,
-        helpContent
+        helpContent,
+        blocks: blocks || undefined,
       }
     });
-
-    res.status(201).json(page);
+    res.json(page);
   } catch (error) {
+    console.error(error);
     res.status(500).json({ message: 'Server error' });
   }
 };
@@ -110,15 +110,14 @@ const addPage = async (req, res) => {
 // PUT /api/modules/:id/pages/:pageId - Update page (teacher only)
 const updatePage = async (req, res) => {
   try {
-    const { content, extendContent, helpContent } = req.body;
-
+    const { content, extendContent, helpContent, blocks } = req.body;
     const page = await prisma.modulePage.update({
       where: { id: req.params.pageId },
-      data: { content, extendContent, helpContent }
+      data: { content, extendContent, helpContent, blocks: blocks || undefined }
     });
-
     res.json(page);
   } catch (error) {
+    console.error(error);
     res.status(500).json({ message: 'Server error' });
   }
 };
