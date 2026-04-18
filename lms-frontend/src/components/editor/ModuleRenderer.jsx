@@ -112,16 +112,22 @@ function renderNode(node, index, tier) {
       return <li key={index} style={{ marginBottom: '4px', fontSize: '15px', color: '#374151', lineHeight: 1.7 }}>{node.content?.map((n, i) => renderNode(n, i))}</li>;
 
     case 'text': {
-      let el = node.text;
-      if (node.marks) {
-        node.marks.forEach(mark => {
-          if (mark.type === 'bold') el = <strong key="b" style={{ fontWeight: 700, color: '#0f172a' }}>{el}</strong>;
-          if (mark.type === 'italic') el = <em key="i">{el}</em>;
-          if (mark.type === 'underline') el = <u key="u">{el}</u>;
-        });
-      }
-      return <span key={index}>{el}</span>;
-    }
+  let el = node.text;
+  if (node.marks) {
+    node.marks.forEach(mark => {
+      if (mark.type === 'bold') el = <strong key="b" style={{ fontWeight: 700, color: '#0f172a' }}>{el}</strong>;
+      if (mark.type === 'italic') el = <em key="i">{el}</em>;
+      if (mark.type === 'underline') el = <u key="u">{el}</u>;
+      if (mark.type === 'link') el = (
+        <a key="a" href={mark.attrs?.href} target="_blank" rel="noopener noreferrer"
+          style={{ color: '#2563eb', textDecoration: 'underline' }}>
+          {el}
+        </a>
+      );
+    });
+  }
+  return <span key={index}>{el}</span>;
+}
 
     case 'showHideBlock': {
   const blockType = node.attrs?.type;

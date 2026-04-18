@@ -40,7 +40,7 @@ export default function ModuleEditor({ content, onChange }) {
       StarterKit.configure({ heading: false }),
       Underline,
       Heading.configure({ levels: [1, 2, 3] }),
-      Link.configure({ openOnClick: false }),
+      Link.configure({ openOnClick: false, HTMLAttributes: { target: '_blank', rel: 'noopener noreferrer' } }),
       Image,
       ShowHideExtension,
       EquationExtension,
@@ -76,10 +76,17 @@ export default function ModuleEditor({ content, onChange }) {
   };
 
   const addLink = () => {
-    const url = window.prompt('Enter URL:');
-    if (!url) return;
-    editor.chain().focus().setLink({ href: url }).run();
-  };
+  const url = window.prompt('Enter URL:');
+  if (!url) return;
+  const href = url.startsWith('http') ? url : `https://${url}`;
+  if (editor.state.selection.empty) {
+    // No text selected — insert the URL as clickable text
+    editor.chain().focus().insertContent(`<a href="${href}">${href}</a>`).run();
+  } else {
+    // Text is selected — wrap it with the link
+    editor.chain().focus().setLink({ href }).run();
+  }
+};
 
   const handleImageUpload = (e) => {
     const file = e.target.files[0];
