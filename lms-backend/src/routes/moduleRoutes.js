@@ -7,7 +7,8 @@ const {
   updateModule,
   deleteModule,
   addPage,
-  updatePage
+  updatePage,
+  deletePage,
 } = require('../controllers/moduleController');
 const authMiddleware = require('../middleware/authMiddleware');
 const roleMiddleware = require('../middleware/roleMiddleware');
@@ -22,5 +23,6 @@ router.put('/:id', authMiddleware, roleMiddleware('TEACHER'), updateModule);
 router.delete('/:id', authMiddleware, roleMiddleware('TEACHER'), deleteModule);
 router.post('/:id/pages', authMiddleware, roleMiddleware('TEACHER'), addPage);
 router.put('/:id/pages/:pageId', authMiddleware, roleMiddleware('TEACHER'), updatePage);
+router.delete('/:id/pages/:pageId', authMiddleware, roleMiddleware('TEACHER'), deletePage);
 
 module.exports = router;

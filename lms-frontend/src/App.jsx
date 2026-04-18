@@ -14,6 +14,8 @@ import PostTestPage from './pages/PostTestPage';
 import TeacherDashboard from './pages/TeacherDashboard';
 import TeacherModulePage from './pages/TeacherModulePage';
 import TeacherModuleEditPage from './pages/TeacherModuleEditPage';
+import TeacherTopicEditPage from './pages/TeacherTopicEditPage';
+
 import TeacherMediaPage from './pages/TeacherMediaPage';
 import TeacherExercisePage from './pages/TeacherExercisePage';
 import TeacherDiagnosticPage from './pages/TeacherDiagnosticPage';
@@ -55,6 +57,8 @@ export default function App() {
           <Route path="/teacher/exercises" element={<TeacherRoute><TeacherExercisePage /></TeacherRoute>} />
           <Route path="/teacher/diagnostic" element={<TeacherRoute><TeacherDiagnosticPage /></TeacherRoute>} />
           <Route path="/teacher/students" element={<TeacherRoute><TeacherStudentPage /></TeacherRoute>} />
+          <Route path="/teacher/modules/:id/topics/:topicId/edit" element={<TeacherRoute><TeacherTopicEditPage /></TeacherRoute>} />
+
 
           <Route path="*" element={<Navigate to="/login" />} />
         </Routes>

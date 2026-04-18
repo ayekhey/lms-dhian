@@ -123,6 +123,17 @@ const updatePage = async (req, res) => {
   }
 };
 
+const deletePage = async (req, res) => {
+  try {
+    await prisma.modulePage.delete({
+      where: { id: req.params.pageId }
+    });
+    res.json({ message: 'Topic deleted' });
+  } catch (error) {
+    res.status(500).json({ message: 'Server error' });
+  }
+};
+
 module.exports = {
   getModules,
   getModulePages,
@@ -130,5 +141,6 @@ module.exports = {
   updateModule,
   deleteModule,
   addPage,
-  updatePage
+  updatePage,
+  deletePage,
 };
