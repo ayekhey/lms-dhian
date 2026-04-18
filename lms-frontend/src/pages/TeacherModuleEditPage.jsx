@@ -71,22 +71,37 @@ export default function TeacherModuleEditPage() {
     showSuccess('Topic deleted');
   };
 
-  const getPreview = (content) => {
-    try {
-      const doc = typeof content === 'string' ? JSON.parse(content) : content;
-      const texts = [];
-      const extract = (nodes) => {
-        nodes?.forEach(n => {
+  const getPreview = (topic) => {
+  // Try new blocks format first
+  if (topic.blocks && Array.isArray(topic.blocks) && topic.blocks.length > 0) {
+    const mainBlock = topic.blocks.find(b => b.type === 'main');
+    if (mainBlock?.content) {
+      try {
+        const doc = typeof mainBlock.content === 'string' ? JSON.parse(mainBlock.content) : mainBlock.content;
+        const texts = [];
+        const extract = (nodes) => nodes?.forEach(n => {
           if (n.type === 'text') texts.push(n.text);
           if (n.content) extract(n.content);
         });
-      };
-      extract(doc.content);
-      return texts.join(' ').slice(0, 80) || 'Empty topic';
-    } catch {
-      return typeof content === 'string' ? content.slice(0, 80) : 'Topic';
+        extract(doc.content);
+        return texts.join(' ').slice(0, 80) || 'Empty topic';
+      } catch { return 'Topic'; }
     }
-  };
+  }
+  // Fall back to old content format
+  try {
+    const doc = typeof topic.content === 'string' ? JSON.parse(topic.content) : topic.content;
+    const texts = [];
+    const extract = (nodes) => nodes?.forEach(n => {
+      if (n.type === 'text') texts.push(n.text);
+      if (n.content) extract(n.content);
+    });
+    extract(doc?.content);
+    return texts.join(' ').slice(0, 80) || 'Empty topic';
+  } catch {
+    return typeof topic.content === 'string' ? topic.content.slice(0, 80) : 'Topic';
+  }
+};
 
   if (loading) return (
     <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: "'Inter', sans-serif" }}>
@@ -162,7 +177,7 @@ export default function TeacherModuleEditPage() {
                 <div style={s.topicLeft}>
                   <div style={s.topicNum}>{i + 1}</div>
                   <div>
-                    <p style={s.topicPreview}>{getPreview(topic.content)}</p>
+                    <p style={s.topicPreview}>{getPreview(topic)}</p>
                     <p style={s.topicMeta}>Topic {topic.pageNumber}</p>
                   </div>
                 </div>
