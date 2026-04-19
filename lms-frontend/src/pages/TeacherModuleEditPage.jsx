@@ -50,10 +50,8 @@ export default function TeacherModuleEditPage() {
     setAdding(true);
     await api.post(`/modules/${id}/pages`, {
       pageNumber: topics.length + 1,
-      content: JSON.stringify({
-        type: 'doc',
-        content: [{ type: 'paragraph', content: [{ type: 'text', text: newTopicTitle }] }]
-      }),
+      title: newTopicTitle,
+      content: '',
       extendContent: null,
       helpContent: null,
     });
@@ -177,8 +175,8 @@ export default function TeacherModuleEditPage() {
                 <div style={s.topicLeft}>
                   <div style={s.topicNum}>{i + 1}</div>
                   <div>
-                    <p style={s.topicPreview}>{getPreview(topic)}</p>
-                    <p style={s.topicMeta}>Topic {topic.pageNumber}</p>
+                    <p style={s.topicPreview}>{topic.title || getPreview(topic) || 'Untitled topic'}</p>
+                    <p style={s.topicMeta}>{topic.title ? getPreview(topic) || 'Topic ' + topic.pageNumber : 'Topic ' + topic.pageNumber}</p>
                   </div>
                 </div>
                 <div style={s.topicActions}>
