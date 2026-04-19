@@ -51,7 +51,6 @@ model ModulePage {
   id          String   @id @default(uuid())
   moduleId    String
   pageNumber  Int
-  title       String?
   content     String?
   extendContent String?
   helpContent String?

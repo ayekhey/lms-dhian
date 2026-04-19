@@ -12,14 +12,12 @@ export default function TeacherTopicEditPage() {
   const [saving, setSaving] = useState(false);
   const [successMsg, setSuccessMsg] = useState('');
   const [topicNumber, setTopicNumber] = useState('');
-  const [topicTitle, setTopicTitle] = useState('');
 
   useEffect(() => {
     api.get(`/modules/${id}/pages`).then(res => {
       const topic = res.data.find(p => p.id === topicId);
       if (topic) {
         setTopicNumber(topic.pageNumber);
-        setTopicTitle(topic.title || '');
         if (topic.blocks && Array.isArray(topic.blocks) && topic.blocks.length > 0) {
           setBlocks(topic.blocks);
         } else {
@@ -42,7 +40,6 @@ export default function TeacherTopicEditPage() {
     setSaving(true);
     try {
       await api.put(`/modules/${id}/pages/${topicId}`, {
-        title: topicTitle,
         content: '',
         blocks: blocks,
       });
@@ -76,17 +73,6 @@ export default function TeacherTopicEditPage() {
       <div style={s.content}>
         {successMsg && <div style={s.successBanner}>✓ {successMsg}</div>}
 
-        <div style={s.titleField}>
-          <label style={s.titleLabel}>Topic title</label>
-          <input
-            style={s.titleInput}
-            className="lms-title-input"
-            value={topicTitle}
-            onChange={e => setTopicTitle(e.target.value)}
-            placeholder="e.g. Introduction to Verbs"
-          />
-        </div>
-
         {blocks && (
           <BlockEditor blocks={blocks} onChange={setBlocks} />
         )}
@@ -99,7 +85,6 @@ const css = `
   @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
   @keyframes spin { to { transform: rotate(360deg); } }
-  .lms-title-input:focus { outline: none; border-color: #3b82f6 !important; box-shadow: 0 0 0 3px rgba(59,130,246,0.12); }
   .ProseMirror { outline: none; padding: 14px 16px; min-height: 72px; font-size: 14px; line-height: 1.75; color: #374151; }
   .ProseMirror p { margin: 0 0 10px; }
   .ProseMirror h1 { font-size: 22px; font-weight: 800; margin: 0 0 10px; color: #0f172a; }
@@ -121,7 +106,4 @@ const s = {
   btnPrimary: { backgroundColor: '#1d4ed8', color: '#ffffff', border: 'none', borderRadius: '10px', padding: '10px 20px', fontSize: '14px', fontWeight: 600, cursor: 'pointer', fontFamily: "'Inter', sans-serif" },
   content: { maxWidth: '860px', margin: '0 auto', padding: '32px 24px 80px' },
   successBanner: { backgroundColor: '#dcfce7', border: '1px solid #86efac', color: '#166534', padding: '12px 16px', borderRadius: '10px', fontSize: '14px', fontWeight: 600, marginBottom: '20px' },
-  titleField: { marginBottom: '20px' },
-  titleLabel: { display: 'block', fontSize: '13px', fontWeight: 600, color: '#374151', marginBottom: '6px' },
-  titleInput: { width: '100%', border: '1.5px solid #e2e8f0', borderRadius: '10px', padding: '11px 14px', fontSize: '16px', fontWeight: 600, color: '#0f172a', backgroundColor: '#f8fafc', fontFamily: "'Inter', sans-serif", boxSizing: 'border-box', transition: 'border-color 0.2s' },
 };
